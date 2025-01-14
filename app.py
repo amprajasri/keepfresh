@@ -37,7 +37,7 @@ def process_image(file_stream):
                     "content": [
                         {
                             "type": "text",
-                            "text": "Return manufacture date, expiry date, and name of the product in JSON format as item_name, item_mfd, item_exp..."
+                            "text": "Return name and expiry date of the product in JSON format as product_name,product_expdate..."
                         },
                         {
                             "type": "image_url",
