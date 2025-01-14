@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from openai import OpenAI
+import openai
 import base64
 import json
 import os
@@ -25,14 +25,11 @@ def encode_image(image_path):
 
 def process_image(image_path):
     try:
-        # Initialize OpenAI client
-        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-        
         # Encode image
         image_url = f"data:image/jpeg;base64,{encode_image(image_path)}"
-        
+
         # Make OpenAI API call
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model='gpt-4-turbo',
             messages=[
                 {
@@ -40,7 +37,7 @@ def process_image(image_path):
                     "content": [
                         {
                             "type": "text",
-                            "text": "Return manucature date and expiry date and name of the product in json format as item_name,item_mfd,item_exp, the expiry date and manufacture date can also be given using other similar terms but in json it should only be given in 'YYYY-MM-DD' as item_mfd and item_exp , the format should be as 'YYYY-MM-DD' if any of 3 fields are not available and predictable then give as 'not found'in respective field and for some product mfg and best before will be given based on that exp should be calculated. if only single date is given and it is beyond todays date"
+                            "text": "Return manufacture date, expiry date, and name of the product in JSON format as item_name, item_mfd, item_exp..."
                         },
                         {
                             "type": "image_url",
@@ -51,15 +48,14 @@ def process_image(image_path):
             ],
             max_tokens=500,
         )
-        
+
         # Process response
-        json_string = response.choices[0].message.content
+        json_string = response.choices[0].message["content"]
         json_string = json_string.replace("```json\n", "").replace("\n```", "")
         return json.loads(json_string)
     
     except Exception as e:
         raise Exception(f"Error processing image: {str(e)}")
-
 @app.route('/process-image', methods=['GET', 'POST'])
 def process_image_endpoint():
     try:
