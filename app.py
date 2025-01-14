@@ -5,7 +5,7 @@ import json
 import os
 from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
-
+from io import BytesIO
 app = Flask(__name__)
 
 # Configure upload folder
@@ -23,10 +23,14 @@ def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
-def process_image(image_path):
+def process_image(file_stream):
     try:
-        # Encode image
-        image_url = f"data:image/jpeg;base64,{encode_image(image_path)}"
+        # Encode image from in-memory file
+        encoded_image = base64.b64encode(file_stream.read()).decode('utf-8')
+        image_url = f"data:image/jpeg;base64,{encoded_image}"
+        
+        # Reset the file stream pointer
+        file_stream.seek(0)
 
         # Make OpenAI API call
         response = openai.ChatCompletion.create(
@@ -56,6 +60,7 @@ def process_image(image_path):
     
     except Exception as e:
         raise Exception(f"Error processing image: {str(e)}")
+
 @app.route('/process-image', methods=['GET', 'POST'])
 def process_image_endpoint():
     try:
@@ -73,22 +78,17 @@ def process_image_endpoint():
         if not allowed_file(file.filename):
             return jsonify({'error': 'Invalid file type. Allowed types: png, jpg, jpeg'}), 400
         
-        # Save the file
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        
-        # Process the image
-        result = process_image(filepath)
-        
-        # Clean up - remove the uploaded file
-        os.remove(filepath)
+        # Process the file in memory
+        file_stream = BytesIO(file.read())
+        file_stream.seek(0)
+
+        # Process the image (pass the in-memory stream to your function)
+        result = process_image(file_stream)
         
         return jsonify(result)
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 if __name__ == '__main__':
     # Ensure OPENAI_API_KEY is set
     if not os.getenv('OPENAI_API_KEY'):
