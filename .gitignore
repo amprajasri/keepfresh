@@ -1,0 +1,56 @@
+# Byte-compiled files
+*.pyc
+*.pyo
+__pycache__/
+
+# Virtual environment
+venv/
+env/
+
+# Logs
+*.log
+*.out
+*.err
+
+# Environment variables
+.env
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Flask-specific
+instance/
+*.sqlite3
+*.db
+
+# Temporary files
+*.swp
+*.tmp
+
+# Uploaded images and processed files
+/images/
+
+# IDE/editor settings
+.idea/
+.vscode/
+
+# Coverage and testing
+.coverage
+htmlcov/
+.tox/
+.nox/
+.cache/
+pytest_cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Jupyter Notebook checkpoints (if used)
+.ipynb_checkpoints/
+
+# Dependencies (if any lock files or dependencies from other tools)
+pip-log.txt
+pip-delete-this-directory.txt
