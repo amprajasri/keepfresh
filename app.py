@@ -33,6 +33,7 @@ def process_image(file_stream):
             model='gpt-4-turbo',
             messages=[
                 {
+                    
                     "role": "user",
                     "content": [
                         {
